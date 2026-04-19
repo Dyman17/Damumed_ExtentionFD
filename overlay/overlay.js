@@ -389,7 +389,7 @@
     const transcript = String(ui.dictation.value || "").trim();
     if (!transcript) {
       addLog(`${source || "parse"}: dictation is empty`);
-      return;
+      return null;
     }
 
     const response = await runtimeMessage({ type: "PARSE_DICTATION", transcript });
@@ -419,9 +419,19 @@
       }
     }
     logSafety(response.safety, source || "parse");
+    return response;
   }
 
   async function requestSchedule(source) {
+    const fields = (lastPreview && lastPreview.fields) || {};
+    const hasProcedures = Array.isArray(fields.procedures) && fields.procedures.length > 0;
+    const hasDictation = Boolean(String(ui.dictation.value || "").trim());
+
+    if (!hasProcedures && hasDictation) {
+      addLog(`${source || "schedule"}: parsing dictation before schedule`);
+      await parseCurrentDictation(`${source || "schedule"}-auto-parse`);
+    }
+
     const response = await runtimeMessage({ type: "VOICE_CHUNK", transcript: "сформируй расписание" });
     if (response.preview) {
       renderPreview(response.preview);
@@ -615,6 +625,9 @@
 
     recognition.onstart = function () {
       setMicState(true);
+      if (!recordingMode) {
+        setRecordingMode(true);
+      }
       addLog("Microphone active");
     };
 
@@ -713,6 +726,9 @@
       return;
     }
     micActive = false;
+    if (recordingMode) {
+      setRecordingMode(false);
+    }
     try {
       recognition.stop();
     } catch (_err) {
