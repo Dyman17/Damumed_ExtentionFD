@@ -782,6 +782,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return false;
   }
 
+  if (message.type === "APPLY_PENDING_SCHEDULE") {
+    (async () => {
+      if (!tabId) {
+        sendResponse({ ok: false, error: "no_tab" });
+        return;
+      }
+      const result = await sendToTab(tabId, { type: "APPLY_PENDING_SCHEDULE" });
+      if (result && result.ok) {
+        notify(tabId, `Schedule applied manually: ${result.schedule.applied} rows.`);
+      } else {
+        notify(tabId, "No pending schedule found on this page.");
+      }
+      sendResponse(result);
+    })();
+    return true;
+  }
+
   if (message.type === "AI_SETTINGS_SAVE") {
     (async () => {
       const openaiApiKey = String(message.openaiApiKey || "").trim();

@@ -219,41 +219,33 @@
   }
 
   function queueScheduleForSchedulePage(payload) {
-    try {
-      sessionStorage.setItem(PENDING_SCHEDULE_KEY, JSON.stringify(payload || {}));
-    } catch (_err) {
-      return false;
-    }
-    return window.AdaptiveSelectors.navigateTo("\u0440\u0430\u0441\u043f\u0438\u0441\u0430\u043d\u0438\u0435") ||
+    chrome.storage.local.set({ [PENDING_SCHEDULE_KEY]: payload || {} }).catch(() => {});
+    const navigated = window.AdaptiveSelectors.navigateTo("\u0440\u0430\u0441\u043f\u0438\u0441\u0430\u043d\u0438\u0435") ||
       window.AdaptiveSelectors.navigateTo("\u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u0438\u044f") ||
       window.AdaptiveSelectors.navigateTo("schedule");
+    return Boolean(navigated);
   }
 
   function applyPendingScheduleIfPresent() {
-    let raw = "";
-    try {
-      raw = sessionStorage.getItem(PENDING_SCHEDULE_KEY) || "";
-    } catch (_err) {
-      raw = "";
-    }
-    if (!raw || !document.querySelector("tr[data-procedure-index], table")) {
+    if (!document.querySelector("tr[data-procedure-index], table")) {
       return;
     }
 
-    try {
-      const payload = JSON.parse(raw);
+    chrome.storage.local.get([PENDING_SCHEDULE_KEY], (data) => {
+      const payload = data && data[PENDING_SCHEDULE_KEY];
+      if (!payload || !Array.isArray(payload.scheduleItems)) {
+        return;
+      }
       const result = applySchedule(payload.scheduleItems || []);
       if (result.applied > 0) {
         clickSaveButton();
-        sessionStorage.removeItem(PENDING_SCHEDULE_KEY);
+        chrome.storage.local.remove([PENDING_SCHEDULE_KEY]).catch(() => {});
         chrome.runtime.sendMessage({
           type: "TIMELINE_FROM_CONTENT",
           text: `Schedule applied: ${result.applied} rows`
         });
       }
-    } catch (_err) {
-      sessionStorage.removeItem(PENDING_SCHEDULE_KEY);
-    }
+    });
   }
 
   function clickSaveButton() {
@@ -428,6 +420,19 @@
       const saved = clickSaveButton();
       sendResponse({ ok: true, fill: result, savedClick: saved });
       return false;
+    }
+
+    if (message.type === "APPLY_PENDING_SCHEDULE") {
+      chrome.storage.local.get([PENDING_SCHEDULE_KEY], (data) => {
+        const payload = data && data[PENDING_SCHEDULE_KEY];
+        const result = applySchedule((payload && payload.scheduleItems) || []);
+        if (result.applied > 0) {
+          chrome.storage.local.remove([PENDING_SCHEDULE_KEY]).catch(() => {});
+          clickSaveButton();
+        }
+        sendResponse({ ok: result.applied > 0, schedule: result });
+      });
+      return true;
     }
 
     return false;

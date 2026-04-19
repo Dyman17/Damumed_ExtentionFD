@@ -56,6 +56,7 @@
       #ai-doc-agent-overlay button.ghost { background: #f8fafc; color: #475569; }
       #ai-doc-agent-overlay button.wide { width: 100%; }
       #ai-doc-agent-overlay #ai-schedule-btn { border-color: #0ea5a2; background: linear-gradient(135deg, #f0fdfa, #ffffff); color: #0f766e; font-weight: 700; }
+      #ai-doc-agent-overlay .secondary-action { border-color: #cbd5df; background: #ffffff; color: #334155; }
       #ai-doc-agent-overlay textarea { width: 100%; min-height: 104px; resize: vertical; padding: 10px; color: #111827; background: #fff; }
       #ai-doc-agent-overlay .record-card { border: 1px solid #dbe7e4; border-radius: 14px; padding: 10px; margin-bottom: 10px; background: #ffffff; }
       #ai-doc-agent-overlay .record-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -77,6 +78,7 @@
       #ai-doc-agent-overlay details { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
       #ai-doc-agent-overlay summary { cursor: pointer; padding: 9px 10px; color: #475569; font-weight: 700; }
       #ai-doc-agent-overlay details .logs { border: 0; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; }
+      #ai-doc-agent-overlay .context-preview { border-top: 1px solid #e2e8f0; padding: 10px; max-height: 120px; overflow: auto; white-space: pre-wrap; color: #334155; font-size: 12px; }
       @media (max-width: 520px) { #ai-doc-agent-overlay { right: 8px; bottom: 8px; width: calc(100vw - 16px); } }
     `;
     document.head.appendChild(style);
@@ -125,6 +127,7 @@
 
       <button id="ai-parse-btn" class="primary wide">Разобрать и подготовить preview</button>
       <button id="ai-schedule-btn" class="wide">Сформировать расписание</button>
+      <button id="ai-apply-schedule-btn" class="wide secondary-action">Применить расписание на этой странице</button>
 
       <div class="preview" id="ai-preview-box">
         <b>Предпросмотр перед сохранением</b>
@@ -141,6 +144,11 @@
       </div>
       <div class="file-name" id="ai-file-name">PDF не загружен</div>
       <div class="file-name" id="ai-template-name">Шаблон не загружен</div>
+
+      <details id="ai-context-details">
+        <summary>Контекст документов</summary>
+        <div id="ai-document-preview" class="context-preview">Документы не загружены.</div>
+      </details>
 
       <details>
         <summary>Журнал действий AI</summary>
@@ -162,6 +170,7 @@
     dictation: root.querySelector("#ai-dictation"),
     parse: root.querySelector("#ai-parse-btn"),
     schedule: root.querySelector("#ai-schedule-btn"),
+    applySchedule: root.querySelector("#ai-apply-schedule-btn"),
     suggestions: root.querySelector("#ai-suggestions"),
     preview: root.querySelector("#ai-preview-content"),
     confirm: root.querySelector("#ai-confirm-btn"),
@@ -169,6 +178,7 @@
     fileName: root.querySelector("#ai-file-name"),
     template: root.querySelector("#ai-template-input"),
     templateName: root.querySelector("#ai-template-name"),
+    documentPreview: root.querySelector("#ai-document-preview"),
     logs: root.querySelector("#ai-logs")
   };
 
@@ -200,7 +210,8 @@
             recordingMode,
             step: ui.step.textContent || "idle",
             fileName: ui.fileName.textContent || "PDF не загружен",
-            templateName: ui.templateName.textContent || "Шаблон не загружен"
+            templateName: ui.templateName.textContent || "Шаблон не загружен",
+            documentPreview: ui.documentPreview.textContent || "Документы не загружены."
           }
         })
         .catch(() => {});
@@ -299,6 +310,7 @@
       ui.dictation.value = String(saved.dictation || "");
       ui.fileName.textContent = saved.fileName || "PDF не загружен";
       ui.templateName.textContent = saved.templateName || "Шаблон не загружен";
+      ui.documentPreview.textContent = saved.documentPreview || "Документы не загружены.";
       if (saved.step) {
         ui.step.textContent = saved.step;
       }
@@ -422,6 +434,15 @@
       addLog(`Action: ${response.action.intent} (${response.action.tool || "n/a"})`);
     }
     logSafety(response.safety, source || "schedule");
+  }
+
+  async function applyPendingSchedule(source) {
+    const response = await runtimeMessage({ type: "APPLY_PENDING_SCHEDULE" });
+    if (response && response.ok) {
+      addLog(`${source || "schedule"}: applied ${response.schedule.applied} rows`);
+    } else {
+      addLog(`${source || "schedule"}: no pending schedule`);
+    }
   }
 
   async function confirmCurrentPreview(source) {
@@ -762,6 +783,10 @@
     await requestSchedule("schedule");
   });
 
+  ui.applySchedule.addEventListener("click", async () => {
+    await applyPendingSchedule("manual-schedule");
+  });
+
   ui.confirm.addEventListener("click", async () => {
     await confirmCurrentPreview("confirm");
   });
@@ -778,7 +803,11 @@
       extractedText
     });
     ui.fileName.textContent = file.name;
+    ui.documentPreview.textContent = extractedText
+      ? `${file.name}\n\n${extractedText.slice(0, 900)}${extractedText.length > 900 ? "\n..." : ""}`
+      : `${file.name}\n\nТекст не извлечен. Для демо надежнее использовать .txt/.md или текстовый PDF.`;
     addLog(`Document upload: ${response.ok ? `accepted (${response.chars || 0} chars)` : "error"}`);
+    persistOverlayState();
     ui.file.value = "";
   });
 

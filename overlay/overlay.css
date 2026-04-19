@@ -163,6 +163,12 @@
   font-weight: 700;
 }
 
+#ai-doc-agent-overlay .secondary-action {
+  border-color: #cbd5df;
+  background: #ffffff;
+  color: #334155;
+}
+
 #ai-doc-agent-overlay button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -313,6 +319,16 @@
   margin-bottom: 5px;
   color: #394557;
   overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+#ai-doc-agent-overlay .context-preview {
+  max-height: 120px;
+  overflow: auto;
+  border-top: 1px solid #e2e8f0;
+  padding: 10px;
+  white-space: pre-wrap;
+  color: #334155;
   font-size: 12px;
 }
 
