@@ -223,11 +223,33 @@
     const navigated = window.AdaptiveSelectors.navigateTo("\u0440\u0430\u0441\u043f\u0438\u0441\u0430\u043d\u0438\u0435") ||
       window.AdaptiveSelectors.navigateTo("\u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u0438\u044f") ||
       window.AdaptiveSelectors.navigateTo("schedule");
-    return Boolean(navigated);
+    if (navigated) {
+      return true;
+    }
+    if (/patient-card|services|epicrisis|schedule/.test(window.location.href)) {
+      window.location.href = new URL("schedule.html", window.location.href).href;
+      return true;
+    }
+    return false;
+  }
+
+  function applySchedulePayload(payload, clearPending) {
+    const result = applySchedule((payload && payload.scheduleItems) || []);
+    if (result.applied > 0) {
+      clickSaveButton();
+      if (clearPending) {
+        chrome.storage.local.remove([PENDING_SCHEDULE_KEY]).catch(() => {});
+      }
+      chrome.runtime.sendMessage({
+        type: "TIMELINE_FROM_CONTENT",
+        text: `Schedule applied: ${result.applied} rows`
+      });
+    }
+    return result;
   }
 
   function applyPendingScheduleIfPresent() {
-    if (!document.querySelector("tr[data-procedure-index], table")) {
+    if (!document.querySelector("tr[data-procedure-index]")) {
       return;
     }
 
@@ -236,16 +258,43 @@
       if (!payload || !Array.isArray(payload.scheduleItems)) {
         return;
       }
-      const result = applySchedule(payload.scheduleItems || []);
-      if (result.applied > 0) {
-        clickSaveButton();
-        chrome.storage.local.remove([PENDING_SCHEDULE_KEY]).catch(() => {});
-        chrome.runtime.sendMessage({
-          type: "TIMELINE_FROM_CONTENT",
-          text: `Schedule applied: ${result.applied} rows`
-        });
-      }
+      applySchedulePayload(payload, true);
     });
+  }
+
+  function injectScheduleApplyButton() {
+    if (!document.querySelector("tr[data-procedure-index]")) {
+      return;
+    }
+    function attach(button) {
+      if (!button || button.dataset.aiScheduleBound === "1") {
+        return;
+      }
+      button.dataset.aiScheduleBound = "1";
+      button.addEventListener("click", () => {
+        chrome.storage.local.get([PENDING_SCHEDULE_KEY], (data) => {
+          const payload = data && data[PENDING_SCHEDULE_KEY];
+          const result = applySchedulePayload(payload || {}, true);
+          chrome.runtime.sendMessage({
+            type: "TIMELINE_FROM_CONTENT",
+            text: result.applied ? `Inline schedule applied: ${result.applied} rows` : "Inline schedule: no pending schedule"
+          });
+        });
+      });
+    }
+    const existing = document.getElementById("ai-apply-schedule-page") || document.getElementById("ai-apply-schedule-inline");
+    if (existing) {
+      attach(existing);
+      return;
+    }
+    const host = document.querySelector(".actions") || document.querySelector("main") || document.body;
+    const btn = document.createElement("button");
+    btn.id = "ai-apply-schedule-inline";
+    btn.type = "button";
+    btn.className = "primary";
+    btn.textContent = "Применить AI расписание";
+    attach(btn);
+    host.appendChild(btn);
   }
 
   function clickSaveButton() {
@@ -423,13 +472,15 @@
     }
 
     if (message.type === "APPLY_PENDING_SCHEDULE") {
+      const directPayload = message.preview && Array.isArray(message.preview.scheduleItems) ? message.preview : null;
+      if (directPayload) {
+        const result = applySchedulePayload(directPayload, false);
+        sendResponse({ ok: result.applied > 0, schedule: result });
+        return false;
+      }
       chrome.storage.local.get([PENDING_SCHEDULE_KEY], (data) => {
         const payload = data && data[PENDING_SCHEDULE_KEY];
-        const result = applySchedule((payload && payload.scheduleItems) || []);
-        if (result.applied > 0) {
-          chrome.storage.local.remove([PENDING_SCHEDULE_KEY]).catch(() => {});
-          clickSaveButton();
-        }
+        const result = applySchedulePayload(payload || {}, true);
         sendResponse({ ok: result.applied > 0, schedule: result });
       });
       return true;
@@ -438,5 +489,6 @@
     return false;
   });
 
-  applyPendingScheduleIfPresent();
+  injectScheduleApplyButton();
+  setTimeout(applyPendingScheduleIfPresent, 250);
 })();

@@ -437,7 +437,10 @@
   }
 
   async function applyPendingSchedule(source) {
-    const response = await runtimeMessage({ type: "APPLY_PENDING_SCHEDULE" });
+    const response = await runtimeMessage({
+      type: "APPLY_PENDING_SCHEDULE",
+      preview: lastPreview && Array.isArray(lastPreview.scheduleItems) ? lastPreview : null
+    });
     if (response && response.ok) {
       addLog(`${source || "schedule"}: applied ${response.schedule.applied} rows`);
     } else {

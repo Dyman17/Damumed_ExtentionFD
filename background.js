@@ -422,6 +422,7 @@ async function handleScheduler(tabId, state, envelope) {
 
   state.preview = schedulePreview;
   state.lastSafety = { ok: true, blockingIssues: [], warnings: [] };
+  await chrome.storage.local.set({ aiDocPendingSchedule: schedulePreview });
 
   machine.transition("preview");
   chrome.tabs.sendMessage(tabId, {
@@ -788,7 +789,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ ok: false, error: "no_tab" });
         return;
       }
-      const result = await sendToTab(tabId, { type: "APPLY_PENDING_SCHEDULE" });
+      const result = await sendToTab(tabId, { type: "APPLY_PENDING_SCHEDULE", preview: message.preview || null });
       if (result && result.ok) {
         notify(tabId, `Schedule applied manually: ${result.schedule.applied} rows.`);
       } else {
