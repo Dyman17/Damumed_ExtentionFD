@@ -156,6 +156,13 @@
   margin-bottom: 10px;
 }
 
+#ai-doc-agent-overlay #ai-schedule-btn {
+  border-color: #0ea5a2;
+  background: linear-gradient(135deg, #f0fdfa, #ffffff);
+  color: #0f766e;
+  font-weight: 700;
+}
+
 #ai-doc-agent-overlay button:disabled {
   opacity: 0.55;
   cursor: not-allowed;

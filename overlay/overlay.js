@@ -55,6 +55,7 @@
       #ai-doc-agent-overlay button.primary { background: #087568; border-color: #087568; color: #fff; font-weight: 700; }
       #ai-doc-agent-overlay button.ghost { background: #f8fafc; color: #475569; }
       #ai-doc-agent-overlay button.wide { width: 100%; }
+      #ai-doc-agent-overlay #ai-schedule-btn { border-color: #0ea5a2; background: linear-gradient(135deg, #f0fdfa, #ffffff); color: #0f766e; font-weight: 700; }
       #ai-doc-agent-overlay textarea { width: 100%; min-height: 104px; resize: vertical; padding: 10px; color: #111827; background: #fff; }
       #ai-doc-agent-overlay .record-card { border: 1px solid #dbe7e4; border-radius: 14px; padding: 10px; margin-bottom: 10px; background: #ffffff; }
       #ai-doc-agent-overlay .record-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -123,6 +124,7 @@
       <div id="ai-suggestions" class="suggestions"></div>
 
       <button id="ai-parse-btn" class="primary wide">Разобрать и подготовить preview</button>
+      <button id="ai-schedule-btn" class="wide">Сформировать расписание</button>
 
       <div class="preview" id="ai-preview-box">
         <b>Предпросмотр перед сохранением</b>
@@ -159,6 +161,7 @@
     micState: root.querySelector("#ai-mic-state"),
     dictation: root.querySelector("#ai-dictation"),
     parse: root.querySelector("#ai-parse-btn"),
+    schedule: root.querySelector("#ai-schedule-btn"),
     suggestions: root.querySelector("#ai-suggestions"),
     preview: root.querySelector("#ai-preview-content"),
     confirm: root.querySelector("#ai-confirm-btn"),
@@ -406,6 +409,21 @@
     logSafety(response.safety, source || "parse");
   }
 
+  async function requestSchedule(source) {
+    const response = await runtimeMessage({ type: "VOICE_CHUNK", transcript: "сформируй расписание" });
+    if (response.preview) {
+      renderPreview(response.preview);
+      addLog(`${source || "schedule"}: preview generated`);
+    }
+    if (response.step) {
+      setStep(response.step);
+    }
+    if (response.action && response.action.intent) {
+      addLog(`Action: ${response.action.intent} (${response.action.tool || "n/a"})`);
+    }
+    logSafety(response.safety, source || "schedule");
+  }
+
   async function confirmCurrentPreview(source) {
     const response = await runtimeMessage({ type: "PREVIEW_DECISION", decision: "confirm" });
     if (response.ok) {
@@ -447,6 +465,11 @@
     if (isPhrase(value, ["разбери в поля", "разобрать в поля", "заполни поля", "обработай запись"])) {
       setRecordingMode(false);
       parseCurrentDictation("voice-parse");
+      return true;
+    }
+    if (isPhrase(value, ["сформируй расписание", "сделай расписание", "построй расписание", "создай расписание"])) {
+      setRecordingMode(false);
+      requestSchedule("voice-schedule");
       return true;
     }
     if (isPhrase(value, ["подтверди", "подтвердить", "сохрани", "сохранить"])) {
@@ -709,6 +732,10 @@
 
   ui.parse.addEventListener("click", async () => {
     await parseCurrentDictation("parse");
+  });
+
+  ui.schedule.addEventListener("click", async () => {
+    await requestSchedule("schedule");
   });
 
   ui.confirm.addEventListener("click", async () => {
