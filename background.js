@@ -109,22 +109,34 @@ function buildFallbackReason(result) {
   return [result.error, result.details].filter(Boolean).join(": ");
 }
 
-async function parseDictationViaOpenAI(transcript, patient, workflowStep) {
+function summarizeContextItems(items, maxItems, maxChars) {
+  return (Array.isArray(items) ? items : [])
+    .slice(0, maxItems)
+    .map((item) => ({
+      name: String(item.name || "context").slice(0, 120),
+      content: String(item.content || item.text || "").slice(0, maxChars)
+    }))
+    .filter((item) => item.content);
+}
+
+async function parseDictationViaOpenAI(transcript, patient, workflowStep, extraContext) {
   const { openaiApiKey, openaiModel } = await getAiSettings();
   if (!openaiApiKey) {
     return { ok: false, error: "api_key_missing" };
   }
 
   const systemPrompt = [
-    "You are a medical documentation assistant for rehabilitation clinic workflows.",
-    "Return ONLY valid JSON object.",
-    "Extract and structure dictated text into these keys:",
+    "You are a medical secretary for a rehabilitation clinic.",
+    "Convert doctor dictation into structured JSON for a medical information system.",
+    "Return ONLY valid JSON object with these keys:",
     "complaints, anamnesis, objective, plan, procedures, recommendations, diagnosis.",
     "Rules:",
-    "1) Use clinical language and concise phrasing.",
-    "2) Do not invent facts that are absent in transcript/context.",
-    "3) If value is absent, return null.",
-    "4) procedures must be an array of strings or null."
+    "1) Use professional clinical terminology, not casual wording.",
+    "2) Do not invent symptoms, diagnoses, procedures, dates, or lab values.",
+    "3) Use patient context, uploaded documents, and doctor templates only as supporting context.",
+    "4) If a value is absent, return null.",
+    "5) procedures must be an array of procedure names or null.",
+    "6) complaints are subjective symptoms; anamnesis is history/dynamics; objective is exam status; plan is treatment course; recommendations are regime/home advice."
   ].join("\n");
 
   const userPayload = {
@@ -134,7 +146,9 @@ async function parseDictationViaOpenAI(transcript, patient, workflowStep) {
       fullName: (patient && patient.fullName) || "",
       diagnosis: (patient && patient.diagnosis) || "",
       age: (patient && patient.age) || ""
-    }
+    },
+    uploadedDocuments: summarizeContextItems(extraContext && extraContext.uploadedDocuments, 3, 2200),
+    doctorTemplates: summarizeContextItems(extraContext && extraContext.doctorTemplates, 3, 1800)
   };
 
   let response;
@@ -204,7 +218,7 @@ async function parseDictationViaOpenAI(transcript, patient, workflowStep) {
   };
 }
 
-async function parseDictationViaProxy(transcript, patient, workflowStep) {
+async function parseDictationViaProxy(transcript, patient, workflowStep, extraContext) {
   const { proxyBaseUrl, proxyAuthToken } = await getAiSettings();
   if (!proxyBaseUrl) {
     return { ok: false, error: "proxy_not_configured" };
@@ -229,7 +243,9 @@ async function parseDictationViaProxy(transcript, patient, workflowStep) {
           fullName: (patient && patient.fullName) || "",
           diagnosis: (patient && patient.diagnosis) || "",
           age: (patient && patient.age) || ""
-        }
+        },
+        uploadedDocuments: summarizeContextItems(extraContext && extraContext.uploadedDocuments, 3, 2200),
+        doctorTemplates: summarizeContextItems(extraContext && extraContext.doctorTemplates, 3, 1800)
       })
     });
   } catch (err) {
@@ -272,13 +288,13 @@ async function parseDictationViaProxy(transcript, patient, workflowStep) {
   };
 }
 
-async function parseDictationWithLLM(transcript, patient, workflowStep) {
-  const viaProxy = await parseDictationViaProxy(transcript, patient, workflowStep);
+async function parseDictationWithLLM(transcript, patient, workflowStep, extraContext) {
+  const viaProxy = await parseDictationViaProxy(transcript, patient, workflowStep, extraContext);
   if (viaProxy.ok) {
     return viaProxy;
   }
 
-  const direct = await parseDictationViaOpenAI(transcript, patient, workflowStep);
+  const direct = await parseDictationViaOpenAI(transcript, patient, workflowStep, extraContext);
   if (direct.ok) {
     return direct;
   }
@@ -299,7 +315,8 @@ function getTabState(tabId) {
       timeline: [],
       transcript: "",
       currentAction: null,
-      lastSafety: null
+      lastSafety: null,
+      uploadedDocuments: []
     });
   }
   return tabState.get(tabId);
@@ -430,10 +447,15 @@ async function handleScribe(tabId, state, envelope) {
   machine.transition("parsing");
   const transcript = envelope.args.transcript || "";
   const actionContextBeforeParse = buildActionContext(state, transcript);
+  const doctorTemplates = await self.TemplateManager.loadTemplates();
   const llmParsed = await parseDictationWithLLM(
     transcript,
     actionContextBeforeParse.patient,
-    actionContextBeforeParse.workflowStep
+    actionContextBeforeParse.workflowStep,
+    {
+      uploadedDocuments: state.uploadedDocuments || [],
+      doctorTemplates
+    }
   );
 
   const parsed = llmParsed.ok
@@ -719,10 +741,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "PDF_FILE_UPLOADED") {
+    const state = tabId ? getTabState(tabId) : null;
+    const meta = message.fileMeta || {};
+    const text = String(message.extractedText || "").trim().slice(0, 8000);
+    if (state) {
+      state.uploadedDocuments = [
+        ...(state.uploadedDocuments || []),
+        {
+          name: String(meta.name || "document"),
+          type: String(meta.type || "application/octet-stream"),
+          size: Number(meta.size || 0),
+          content: text,
+          createdAt: new Date().toISOString()
+        }
+      ].slice(-5);
+      notify(tabId, text ? `Document added to AI context: ${meta.name || "document"}.` : `Document uploaded, but text extraction is limited: ${meta.name || "document"}.`);
+    }
     sendResponse({
       ok: true,
-      note: "PDF accepted. Full parsing module is still a placeholder.",
-      fileMeta: message.fileMeta || null
+      note: text ? "Document text added to AI context." : "Document accepted, but text extraction returned empty content.",
+      chars: text.length,
+      fileMeta: meta
     });
     return false;
   }

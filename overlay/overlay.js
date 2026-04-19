@@ -134,9 +134,9 @@
       <button id="ai-confirm-btn" class="primary wide">Подтвердить и сохранить</button>
 
       <div class="asset-row">
-        <label class="file-btn" for="ai-file-input">+ PDF анализы</label>
+        <label class="file-btn" for="ai-file-input">+ Документ/PDF</label>
         <label class="file-btn" for="ai-template-input">+ Шаблон врача</label>
-        <input id="ai-file-input" type="file" accept=".pdf" />
+        <input id="ai-file-input" type="file" accept=".pdf,.txt,.md" />
         <input id="ai-template-input" type="file" accept=".txt,.md,.json" />
       </div>
       <div class="file-name" id="ai-file-name">PDF не загружен</div>
@@ -453,6 +453,30 @@
     persistOverlayState();
   }
 
+  async function extractReadableText(file) {
+    if (!file) {
+      return "";
+    }
+    const name = String(file.name || "").toLowerCase();
+    if (name.endsWith(".txt") || name.endsWith(".md") || String(file.type || "").startsWith("text/")) {
+      return (await file.text()).slice(0, 8000);
+    }
+
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    const limit = Math.min(bytes.length, 900000);
+    for (let i = 0; i < limit; i += 1) {
+      const code = bytes[i];
+      binary += code >= 32 && code <= 126 ? String.fromCharCode(code) : " ";
+    }
+    return binary
+      .replace(/\s+/g, " ")
+      .match(/[A-Za-zА-Яа-яЁё0-9.,:;()%/+\-\s]{16,}/g)
+      ?.join(" ")
+      .slice(0, 8000) || "";
+  }
+
   function handleVoiceCommand(value) {
     if (isPhrase(value, ["начни запись", "начать запись", "старт запись", "начинай запись"])) {
       setRecordingMode(true);
@@ -747,12 +771,14 @@
     if (!file) {
       return;
     }
+    const extractedText = await extractReadableText(file);
     const response = await runtimeMessage({
       type: "PDF_FILE_UPLOADED",
-      fileMeta: { name: file.name, size: file.size, type: file.type || "application/pdf" }
+      fileMeta: { name: file.name, size: file.size, type: file.type || "application/pdf" },
+      extractedText
     });
     ui.fileName.textContent = file.name;
-    addLog(`PDF upload: ${response.ok ? "accepted" : "error"}`);
+    addLog(`Document upload: ${response.ok ? `accepted (${response.chars || 0} chars)` : "error"}`);
     ui.file.value = "";
   });
 

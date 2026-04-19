@@ -65,6 +65,16 @@ function safeJsonParse(text) {
   }
 }
 
+function summarizeContextItems(items, maxItems, maxChars) {
+  return (Array.isArray(items) ? items : [])
+    .slice(0, maxItems)
+    .map((item) => ({
+      name: String(item.name || "context").slice(0, 120),
+      content: String(item.content || item.text || "").slice(0, maxChars)
+    }))
+    .filter((item) => item.content);
+}
+
 function checkClientToken(req, res, next) {
   if (!CLIENT_SHARED_TOKEN) {
     next();
@@ -116,6 +126,8 @@ app.post("/api/parse-dictation", checkClientToken, async (req, res) => {
   const transcript = String((req.body && req.body.transcript) || "").trim();
   const workflowStep = String((req.body && req.body.workflowStep) || "collecting_dictation").trim();
   const patient = (req.body && req.body.patient) || {};
+  const uploadedDocuments = summarizeContextItems(req.body && req.body.uploadedDocuments, 3, 2200);
+  const doctorTemplates = summarizeContextItems(req.body && req.body.doctorTemplates, 3, 1800);
 
   if (!transcript) {
     res.status(400).json({ ok: false, error: "transcript_empty" });
@@ -123,15 +135,17 @@ app.post("/api/parse-dictation", checkClientToken, async (req, res) => {
   }
 
   const systemPrompt = [
-    "You are a medical documentation assistant for rehabilitation clinic workflows.",
-    "Return ONLY valid JSON object.",
-    "Extract and structure dictated text into these keys:",
+    "You are a medical secretary for a rehabilitation clinic.",
+    "Convert doctor dictation into structured JSON for a medical information system.",
+    "Return ONLY valid JSON object with these keys:",
     "complaints, anamnesis, objective, plan, procedures, recommendations, diagnosis.",
     "Rules:",
-    "1) Use clinical language and concise phrasing.",
-    "2) Do not invent facts that are absent in transcript/context.",
-    "3) If value is absent, return null.",
-    "4) procedures must be an array of strings or null."
+    "1) Use professional clinical terminology, not casual wording.",
+    "2) Do not invent symptoms, diagnoses, procedures, dates, or lab values.",
+    "3) Use patient context, uploaded documents, and doctor templates only as supporting context.",
+    "4) If value is absent, return null.",
+    "5) procedures must be an array of procedure names or null.",
+    "6) complaints are subjective symptoms; anamnesis is history/dynamics; objective is exam status; plan is treatment course; recommendations are regime/home advice."
   ].join("\n");
 
   const userPayload = {
@@ -141,7 +155,9 @@ app.post("/api/parse-dictation", checkClientToken, async (req, res) => {
       fullName: String(patient.fullName || ""),
       diagnosis: String(patient.diagnosis || ""),
       age: String(patient.age || "")
-    }
+    },
+    uploadedDocuments,
+    doctorTemplates
   };
 
   let response;
