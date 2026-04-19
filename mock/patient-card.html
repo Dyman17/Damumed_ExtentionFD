@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Пациент: Иванов Артем</title>
+    <style>
+      body {
+        margin: 0;
+        font: 14px/1.35 "Segoe UI", Tahoma, sans-serif;
+        background: #f1f5f9;
+        color: #1f2937;
+      }
+      header {
+        padding: 10px 14px;
+        border-bottom: 1px solid #d5dde5;
+        background: #fff;
+      }
+      nav {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      nav a,
+      nav button {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 6px 10px;
+        background: #fff;
+        text-decoration: none;
+        color: #111827;
+      }
+      main {
+        max-width: 980px;
+        margin: 12px auto;
+        padding: 0 12px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #d8e0e8;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .full {
+        grid-column: 1 / -1;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: #475569;
+        margin-bottom: 3px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 7px 8px;
+        font: inherit;
+      }
+      textarea {
+        min-height: 72px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        padding: 6px;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .actions button {
+        border: 1px solid #0f766e;
+        background: #0f766e;
+        color: #fff;
+        border-radius: 8px;
+        padding: 8px 12px;
+      }
+    </style>
+    <link rel="stylesheet" href="mock-style.css" />
+    <link rel="stylesheet" href="../overlay/overlay.css" />
+  </head>
+  <body>
+    <header>
+      <div><b>КМИС Дамумед · Mock</b></div>
+      <nav>
+        <button data-page="reception" id="tab-reception">Первичный осмотр</button>
+        <a data-page="schedule" id="tab-schedule" href="schedule.html">Назначения / Расписание</a>
+        <a data-page="status" id="tab-status" href="services.html">Журнал услуг</a>
+        <a data-page="epicrisis" id="tab-epicrisis" href="epicrisis.html">Выписной эпикриз</a>
+      </nav>
+    </header>
+    <main>
+      <section class="card">
+        <div class="grid">
+          <div>
+            <label>ФИО пациента</label>
+            <input value="Иванов Артем Сергеевич" aria-label="ФИО пациента" />
+          </div>
+          <div>
+            <label>Возраст</label>
+            <input value="8 лет" aria-label="Возраст" />
+          </div>
+          <div class="full">
+            <label>Диагноз (МКБ)</label>
+            <input value="ДЦП, G80.1" aria-label="Диагноз" />
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Первичный осмотр</h3>
+        <div class="grid">
+          <div class="full">
+            <label for="complaints">Жалобы</label>
+            <textarea id="complaints" name="complaints" placeholder="Жалобы"></textarea>
+          </div>
+          <div class="full">
+            <label for="anamnesis">Анамнез</label>
+            <textarea id="anamnesis" name="anamnesis" placeholder="Анамнез"></textarea>
+          </div>
+          <div class="full">
+            <label for="objective">Объективный статус</label>
+            <textarea id="objective" name="objective" placeholder="Объективный статус"></textarea>
+          </div>
+          <div class="full">
+            <label for="plan">План лечения</label>
+            <textarea id="plan" name="plan" placeholder="План"></textarea>
+          </div>
+          <div class="full">
+            <label for="recommendations">Рекомендации</label>
+            <textarea id="recommendations" name="recommendations" placeholder="Рекомендации"></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="save-form-btn">Сохранить</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Предыдущие записи</h3>
+        <table class="previous-records">
+          <tr><th>Дата</th><th>Запись</th></tr>
+          <tr><td>2026-04-10</td><td>Неврологический статус без выраженной динамики.</td></tr>
+          <tr><td>2026-04-12</td><td>Отмечена лучшая переносимость ЛФК.</td></tr>
+        </table>
+      </section>
+    </main>
+    <script src="../modules/selectors.js"></script>
+    <script src="../overlay/overlay.js"></script>
+    <script src="../content_script.js"></script>
+  </body>
+</html>

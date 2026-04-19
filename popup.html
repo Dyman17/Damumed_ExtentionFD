@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Doc Agent</title>
+    <style>
+      body {
+        margin: 0;
+        width: 340px;
+        font: 13px/1.4 "Segoe UI", Tahoma, sans-serif;
+        background: #f4fbf8;
+        color: #172033;
+      }
+
+      .wrap {
+        padding: 14px;
+      }
+
+      .hero {
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #0f766e 0%, #0b9384 100%);
+        color: #ffffff;
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        font-size: 18px;
+      }
+
+      .subtitle {
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 12px;
+      }
+
+      label {
+        display: block;
+        margin: 9px 0 4px;
+        color: #475569;
+        font-weight: 700;
+      }
+
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #cbd5df;
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 8px 10px;
+        color: #111827;
+      }
+
+      button {
+        width: 100%;
+        min-height: 40px;
+        margin-top: 10px;
+        border: 1px solid #087568;
+        border-radius: 10px;
+        background: #087568;
+        color: #ffffff;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+      }
+
+      button.secondary {
+        border-color: #cbd5df;
+        background: #ffffff;
+        color: #172033;
+      }
+
+      #status {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #dbe7e4;
+        border-radius: 12px;
+        background: #ffffff;
+        white-space: pre-wrap;
+        color: #475569;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="hero">
+        <h1>AI Doc Agent</h1>
+        <div class="subtitle">Внешний AI-слой поверх mock Damumed.</div>
+      </div>
+
+      <label for="proxyUrlInput">Render proxy URL</label>
+      <input id="proxyUrlInput" type="text" placeholder="https://web-service-case.onrender.com" />
+
+      <label for="proxyTokenInput">Client token</label>
+      <input id="proxyTokenInput" type="password" placeholder="AISHack" />
+
+      <label for="modelInput">Model</label>
+      <input id="modelInput" type="text" placeholder="gpt-4o-mini" />
+
+      <button id="saveAiBtn">Сохранить настройки</button>
+      <button id="testAiBtn" class="secondary">Проверить AI proxy</button>
+      <button id="openMockBtn" class="secondary">Открыть demo mock</button>
+
+      <div id="status">Готово.</div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

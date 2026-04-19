@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Выписной эпикриз</title>
+    <style>
+      body { margin: 0; font: 14px/1.35 "Segoe UI", Tahoma, sans-serif; background: #f1f5f9; }
+      header, main { padding: 12px; }
+      .card { background: #fff; border: 1px solid #d8e0e8; border-radius: 10px; padding: 12px; }
+      label { display: block; font-size: 12px; color: #475569; margin-bottom: 4px; margin-top: 8px; }
+      textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; min-height: 84px; padding: 6px 8px; }
+      .actions { margin-top: 10px; }
+      .actions button, .actions a {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        padding: 7px 10px;
+        margin-right: 6px;
+        text-decoration: none;
+        color: #111827;
+      }
+      .actions button.primary {
+        border-color: #0f766e;
+        background: #0f766e;
+        color: #fff;
+      }
+    </style>
+    <link rel="stylesheet" href="mock-style.css" />
+    <link rel="stylesheet" href="../overlay/overlay.css" />
+  </head>
+  <body>
+    <header>
+      <b>Mock · Выписной эпикриз</b>
+      <div class="actions">
+        <a id="tab-reception" data-page="reception" href="patient-card.html">Первичный осмотр</a>
+        <a id="tab-status" data-page="status" href="services.html">Журнал услуг</a>
+      </div>
+    </header>
+    <main>
+      <section class="card">
+        <label>Диагноз</label>
+        <textarea name="diagnosis" placeholder="Диагноз"></textarea>
+        <label>Результаты лечения</label>
+        <textarea name="objectiveStatus" placeholder="Результаты лечения"></textarea>
+        <label>Рекомендации</label>
+        <textarea name="recommendations" placeholder="Рекомендации"></textarea>
+        <label>Данные из PDF</label>
+        <textarea name="pdf-data" placeholder="Лабораторные показатели / заключения"></textarea>
+        <div class="actions">
+          <button class="primary">Сохранить</button>
+        </div>
+      </section>
+    </main>
+    <script src="../modules/selectors.js"></script>
+    <script src="../overlay/overlay.js"></script>
+    <script src="../content_script.js"></script>
+  </body>
+</html>

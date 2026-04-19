@@ -1,0 +1,17 @@
+﻿services:
+  - type: web
+    name: ai-doc-agent-proxy
+    env: node
+    plan: free
+    rootDir: ai-doc-agent/proxy-server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: CLIENT_SHARED_TOKEN
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: ""

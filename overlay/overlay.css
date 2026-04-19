@@ -1,0 +1,318 @@
+#ai-doc-agent-overlay {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 430px;
+  max-width: calc(100vw - 32px);
+  max-height: 84vh;
+  overflow: auto;
+  z-index: 2147483647;
+  border: 1px solid #b7d8d1;
+  border-radius: 18px;
+  background: #fbfffd;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.24);
+  font: 14px/1.42 "Segoe UI", Tahoma, sans-serif;
+  color: #172033;
+}
+
+#ai-doc-agent-overlay * {
+  box-sizing: border-box;
+}
+
+#ai-doc-agent-overlay .head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #d8ebe7;
+  background: linear-gradient(135deg, #e9fbf7 0%, #f7fffd 100%);
+}
+
+#ai-doc-agent-overlay .head strong {
+  min-width: 0;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+#ai-doc-agent-overlay .title,
+#ai-doc-agent-overlay .window-controls,
+#ai-doc-agent-overlay .record-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#ai-doc-agent-overlay .title {
+  min-width: 0;
+}
+
+#ai-doc-agent-overlay .window-controls {
+  margin-left: auto;
+}
+
+#ai-doc-agent-overlay .icon-btn {
+  min-width: 30px;
+  min-height: 28px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  line-height: 1;
+}
+
+#ai-doc-agent-overlay .pill {
+  flex: 0 0 auto;
+  min-width: 70px;
+  border: 1px solid #0f766e;
+  color: #0f766e;
+  background: #ffffff;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+  padding: 5px 10px;
+  text-align: center;
+}
+
+#ai-doc-agent-overlay[data-recording="1"] .pill {
+  color: #991b1b;
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+#ai-doc-agent-overlay[data-collapsed="1"] {
+  width: 260px;
+}
+
+#ai-doc-agent-overlay[data-collapsed="1"] .body {
+  display: none;
+}
+
+#ai-doc-agent-overlay[data-collapsed="1"] .head {
+  border-bottom: 0;
+}
+
+#ai-doc-agent-overlay .body {
+  padding: 12px 14px 14px;
+}
+
+#ai-doc-agent-overlay .hero {
+  border: 1px solid #d7ebe6;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #0f766e 0%, #0b9384 100%);
+  color: #ffffff;
+}
+
+#ai-doc-agent-overlay .hero-title {
+  margin-bottom: 3px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+#ai-doc-agent-overlay .hero-sub {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 12px;
+}
+
+#ai-doc-agent-overlay .control-grid,
+#ai-doc-agent-overlay .asset-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#ai-doc-agent-overlay button,
+#ai-doc-agent-overlay textarea {
+  border: 1px solid #cbd5df;
+  border-radius: 10px;
+  font: inherit;
+}
+
+#ai-doc-agent-overlay button {
+  min-height: 40px;
+  background: #ffffff;
+  color: #1f2937;
+  cursor: pointer;
+  padding: 8px 11px;
+  text-align: center;
+  white-space: normal;
+}
+
+#ai-doc-agent-overlay button.primary {
+  background: #087568;
+  border-color: #087568;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+#ai-doc-agent-overlay button.ghost {
+  background: #f8fafc;
+  color: #475569;
+}
+
+#ai-doc-agent-overlay button.wide {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+#ai-doc-agent-overlay button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+#ai-doc-agent-overlay .record-card {
+  border: 1px solid #dbe7e4;
+  border-radius: 14px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #ffffff;
+}
+
+#ai-doc-agent-overlay .record-head {
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+#ai-doc-agent-overlay textarea {
+  width: 100%;
+  min-height: 104px;
+  resize: vertical;
+  padding: 10px;
+  color: #111827;
+  background: #ffffff;
+}
+
+#ai-doc-agent-overlay textarea:focus,
+#ai-doc-agent-overlay button:focus,
+#ai-doc-agent-overlay .file-btn:focus-within {
+  outline: 2px solid #94d5cc;
+  outline-offset: 1px;
+}
+
+#ai-doc-agent-overlay .preview {
+  border: 1px solid #dbe3ea;
+  border-radius: 14px;
+  padding: 12px;
+  background: #f8fafc;
+  margin-bottom: 10px;
+}
+
+#ai-doc-agent-overlay .preview b {
+  display: block;
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+#ai-doc-agent-overlay #ai-preview-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #263241;
+}
+
+#ai-doc-agent-overlay .mic-state {
+  flex: 0 0 auto;
+  min-width: 76px;
+  font-size: 12px;
+  color: #64748b;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: #ffffff;
+  text-align: center;
+}
+
+#ai-doc-agent-overlay .mic-state[data-active="1"] {
+  color: #065f46;
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+#ai-doc-agent-overlay .suggestions {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+#ai-doc-agent-overlay .suggestions button {
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #253044;
+  font-size: 12px;
+}
+
+#ai-doc-agent-overlay .suggestions button.module-chip {
+  border-color: #0ea5e9;
+  color: #0369a1;
+  background: #f0f9ff;
+}
+
+#ai-doc-agent-overlay .asset-row input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#ai-doc-agent-overlay .file-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border: 1px solid #cbd5df;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1f2937;
+  cursor: pointer;
+  padding: 7px 10px;
+}
+
+#ai-doc-agent-overlay .file-name {
+  min-width: 0;
+  color: #4b5563;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+#ai-doc-agent-overlay details {
+  margin-top: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+#ai-doc-agent-overlay summary {
+  cursor: pointer;
+  padding: 9px 10px;
+  color: #475569;
+  font-weight: 700;
+}
+
+#ai-doc-agent-overlay .logs {
+  border-top: 1px solid #e2e8f0;
+  padding: 8px;
+  background: #ffffff;
+  max-height: 160px;
+  overflow: auto;
+}
+
+#ai-doc-agent-overlay .logs div {
+  margin-bottom: 5px;
+  color: #394557;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+@media (max-width: 520px) {
+  #ai-doc-agent-overlay {
+    right: 8px;
+    bottom: 8px;
+    width: calc(100vw - 16px);
+  }
+}

@@ -1,0 +1,27 @@
+# Local/editor
+.vscode/
+.idea/
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Build artifacts
+dist/
+*.zip
+*.crx
+*.pem
+
+# Node/backend artifacts
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Nested backend repo metadata, if proxy-server was deployed separately
+proxy-server/.git/
+
+# Python/cache
+__pycache__/
+*.pyc

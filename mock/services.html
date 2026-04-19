@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Журнал услуг</title>
+    <style>
+      body { margin: 0; font: 14px/1.35 "Segoe UI", Tahoma, sans-serif; background: #f1f5f9; }
+      header, main { padding: 12px; }
+      .card { background: #fff; border: 1px solid #d8e0e8; border-radius: 10px; padding: 12px; }
+      .service { border-bottom: 1px solid #e2e8f0; padding: 8px 0; }
+      .service:last-child { border-bottom: 0; }
+      label { display: block; font-size: 12px; color: #475569; margin-bottom: 4px; }
+      textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; min-height: 64px; padding: 6px 8px; }
+      .row { display: flex; gap: 6px; align-items: center; }
+      .row button { border: 1px solid #0f766e; background: #0f766e; color: #fff; border-radius: 8px; padding: 6px 9px; }
+      .muted { color: #64748b; font-size: 12px; }
+    </style>
+    <link rel="stylesheet" href="mock-style.css" />
+    <link rel="stylesheet" href="../overlay/overlay.css" />
+  </head>
+  <body>
+    <header>
+      <b>Mock · Журнал услуг</b>
+      <div class="row" style="margin-top:6px;">
+        <a id="tab-reception" data-page="reception" href="patient-card.html">Первичный осмотр</a>
+        <a id="tab-schedule" data-page="schedule" href="schedule.html">Расписание</a>
+      </div>
+    </header>
+    <main>
+      <section class="card">
+        <div class="service">
+          <div class="row">
+            <b>ЛФК</b>
+            <span class="muted">09:40</span>
+            <button>Выполнено</button>
+          </div>
+          <label>Короткий дневник процедуры</label>
+          <textarea id="procedure-diary" name="diary"></textarea>
+        </div>
+        <div class="service">
+          <div class="row">
+            <b>Массаж</b>
+            <span class="muted">10:20</span>
+            <button>Выполнено</button>
+          </div>
+          <label>Короткий дневник процедуры</label>
+          <textarea name="diary"></textarea>
+        </div>
+      </section>
+    </main>
+    <script src="../modules/selectors.js"></script>
+    <script src="../overlay/overlay.js"></script>
+    <script src="../content_script.js"></script>
+  </body>
+</html>

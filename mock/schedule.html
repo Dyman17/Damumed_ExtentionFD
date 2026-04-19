@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Расписание процедур</title>
+    <style>
+      body {
+        margin: 0;
+        font: 14px/1.35 "Segoe UI", Tahoma, sans-serif;
+        background: #f1f5f9;
+      }
+      header, main { padding: 12px; }
+      .card {
+        background: #fff;
+        border: 1px solid #d8e0e8;
+        border-radius: 10px;
+        padding: 12px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        padding: 7px;
+      }
+      input {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 5px 6px;
+      }
+      .actions {
+        margin-top: 10px;
+      }
+      .actions a, .actions button {
+        border: 1px solid #d1d5db;
+        background: #fff;
+        border-radius: 8px;
+        padding: 7px 10px;
+        margin-right: 6px;
+        text-decoration: none;
+        color: #111827;
+      }
+      .actions button.primary {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+      }
+    </style>
+    <link rel="stylesheet" href="mock-style.css" />
+    <link rel="stylesheet" href="../overlay/overlay.css" />
+  </head>
+  <body>
+    <header>
+      <b>Mock · Расписание на 9 дней</b>
+      <div class="actions">
+        <a id="tab-reception" data-page="reception" href="patient-card.html">Первичный осмотр</a>
+        <a id="tab-status" data-page="status" href="services.html">Журнал услуг</a>
+        <a id="tab-epicrisis" data-page="epicrisis" href="epicrisis.html">Эпикриз</a>
+      </div>
+    </header>
+    <main>
+      <section class="card">
+        <table>
+          <tr><th>Процедура</th><th>Дата</th><th>Время</th><th>Специалист</th></tr>
+          <tr data-procedure-index="1"><td><input name="procedure" /></td><td><input name="date" /></td><td><input name="time" /></td><td><input name="specialist" /></td></tr>
+          <tr data-procedure-index="2"><td><input name="procedure" /></td><td><input name="date" /></td><td><input name="time" /></td><td><input name="specialist" /></td></tr>
+          <tr data-procedure-index="3"><td><input name="procedure" /></td><td><input name="date" /></td><td><input name="time" /></td><td><input name="specialist" /></td></tr>
+          <tr data-procedure-index="4"><td><input name="procedure" /></td><td><input name="date" /></td><td><input name="time" /></td><td><input name="specialist" /></td></tr>
+        </table>
+        <div class="actions">
+          <button class="primary">Утвердить расписание</button>
+        </div>
+      </section>
+    </main>
+    <script src="../modules/selectors.js"></script>
+    <script src="../overlay/overlay.js"></script>
+    <script src="../content_script.js"></script>
+  </body>
+</html>
